@@ -728,6 +728,10 @@
         "button": "Speed"
       }
     },
+    "playlist-search": {
+      "description": "Search through your playlists in the sidebar and 'Add to playlist' dialog",
+      "name": "Playlist Search"
+    },
     "precise-volume": {
       "description": "Control the volume precisely using mousewheel/hotkeys, with a custom HUD and customizable volume steps",
       "menu": {
