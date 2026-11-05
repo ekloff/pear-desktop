@@ -67,19 +67,14 @@ function initializeSidebarPlaylistFilter() {
   }
 
   const playlistsContainer = playlistSection.querySelector('#items');
-  const recentItems = playlistSection.querySelectorAll(
-    'ytmusic-guide-entry-renderer',
-  );
+  const newPlaylistButton = playlistSection.querySelector('#buttons');
   let insertAfterElement: Element | null = null;
 
-  const newPlaylistButton = playlistSection.querySelector('#buttons');
-  if (recentItems.length >= 4) {
-    insertAfterElement = recentItems[3];
-  } else if (newPlaylistButton) {
+  if (newPlaylistButton) {
     insertAfterElement = newPlaylistButton;
   }
 
-  if (!playlistsContainer || !insertAfterElement) {
+  if (!playlistsContainer) {
     return;
   }
 
@@ -89,7 +84,11 @@ function initializeSidebarPlaylistFilter() {
   ) as HTMLInputElement;
   const noResultsMessage = loadTemplate('sidebar-no-playlists-message');
 
-  insertAfterElement.insertAdjacentElement('afterend', wrapper);
+  if (insertAfterElement) {
+    insertAfterElement.insertAdjacentElement('afterend', wrapper);
+  } else {
+    playlistsContainer.insertAdjacentElement('beforebegin', wrapper);
+  }
   playlistsContainer.insertAdjacentElement('afterend', noResultsMessage);
 
   const handleFilter = (event: Event) => {
@@ -101,8 +100,7 @@ function initializeSidebarPlaylistFilter() {
     );
     let visibleCount = 0;
 
-    playlistItems.forEach((item, index) => {
-      if (index < 4) return;
+    playlistItems.forEach((item) => {
       const titleElement = item.querySelector('.title');
 
       if (titleElement) {
@@ -135,29 +133,13 @@ const initializePlaylistFilter = () => {
     return;
   }
 
-  const recentItems = playlistsContainer.querySelectorAll(
-    'ytmusic-playlist-add-to-option-renderer',
-  );
-  let insertAfterElement: Element | null = null;
-
-  if (recentItems.length >= 4) {
-    insertAfterElement = recentItems[3];
-  } else if (recentItems.length > 0) {
-    insertAfterElement = recentItems[recentItems.length - 1];
-  }
-
   const wrapper = loadTemplate('dialogSearchWrapper');
   const searchInput = wrapper.querySelector(
     '#playlist-search-input',
   ) as HTMLInputElement;
   const noResultsMessage = loadTemplate('dialog-no-playlists-message');
 
-  if (insertAfterElement) {
-      insertAfterElement.insertAdjacentElement('afterend', wrapper);
-  } else {
-      playlistsContainer.insertAdjacentElement('afterbegin', wrapper);
-  }
-
+  playlistsContainer.insertAdjacentElement('beforebegin', wrapper);
   playlistsContainer.insertAdjacentElement('afterend', noResultsMessage);
 
   const handleFilter = (event: Event) => {
@@ -169,8 +151,7 @@ const initializePlaylistFilter = () => {
     );
     let visibleCount = 0;
 
-    playlistItems.forEach((item, index) => {
-      if (index < 4) return;
+    playlistItems.forEach((item) => {
       const titleElem = item.querySelector('#title');
       if (titleElem) {
         const title = titleElem.getAttribute('title')?.toLowerCase() || '';
@@ -192,7 +173,9 @@ const initializePlaylistFilter = () => {
 };
 
 function checkDialogState() {
-  const dialogElement = document.querySelector('tp-yt-paper-dialog:has(ytmusic-add-to-playlist-renderer)');
+  const dialogElement = document.querySelector(
+    'tp-yt-paper-dialog:has(ytmusic-add-to-playlist-renderer)',
+  );
   const isNowVisible =
     dialogElement && (dialogElement as HTMLElement).style.display !== 'none';
 
@@ -222,10 +205,10 @@ const resetFilter = () => {
   }
 
   const playlistItems = document.querySelectorAll(
-      'ytmusic-playlist-add-to-option-renderer',
+    'ytmusic-playlist-add-to-option-renderer',
   );
   playlistItems.forEach((item) => {
-      (item as HTMLElement).style.display = '';
+    (item as HTMLElement).style.display = '';
   });
 };
 
@@ -260,7 +243,8 @@ export default createPlugin({
         checkDialogState();
       });
       // A better approach is to observe ytmusic-popup-container if it exists.
-      const popupContainer = document.querySelector('ytmusic-popup-container') || document.body;
+      const popupContainer =
+        document.querySelector('ytmusic-popup-container') || document.body;
       dialogObserver.observe(popupContainer, {
         childList: true,
         subtree: true,
@@ -276,10 +260,18 @@ export default createPlugin({
             'sidebar-playlist-search-input',
           ) as HTMLInputElement;
 
-          if (isDialogVisible && dialogSearchInput && document.activeElement !== dialogSearchInput) {
-              e.preventDefault();
-              dialogSearchInput.focus();
-          } else if (!isDialogVisible && sidebarSearchInput && document.activeElement !== sidebarSearchInput) {
+          if (
+            isDialogVisible &&
+            dialogSearchInput &&
+            document.activeElement !== dialogSearchInput
+          ) {
+            e.preventDefault();
+            dialogSearchInput.focus();
+          } else if (
+            !isDialogVisible &&
+            sidebarSearchInput &&
+            document.activeElement !== sidebarSearchInput
+          ) {
             e.preventDefault();
             sidebarSearchInput.focus();
           }
@@ -306,17 +298,17 @@ export default createPlugin({
       document.getElementById('no-playlists-message')?.remove();
 
       const sidebarItems = document.querySelectorAll(
-          'ytmusic-guide-entry-renderer',
+        'ytmusic-guide-entry-renderer',
       );
       sidebarItems.forEach((item) => {
-          (item as HTMLElement).style.display = '';
+        (item as HTMLElement).style.display = '';
       });
 
       const dialogItems = document.querySelectorAll(
-          'ytmusic-playlist-add-to-option-renderer',
+        'ytmusic-playlist-add-to-option-renderer',
       );
       dialogItems.forEach((item) => {
-          (item as HTMLElement).style.display = '';
+        (item as HTMLElement).style.display = '';
       });
     },
   },
